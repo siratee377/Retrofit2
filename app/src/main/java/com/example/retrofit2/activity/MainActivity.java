@@ -7,6 +7,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.retrofit2.R;
 import com.example.retrofit2.adapter.Adapter;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Adapter adapter;
     private RecyclerView recyclerView;
+    SwipeRefreshLayout pullToRefresh;
     private RecyclerView.LayoutManager layoutManager;
     private List<Items> items = new ArrayList<>();
 
@@ -35,21 +37,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view_image);
+        recyclerView = findViewById(R.id.recycler_view_image);
+        pullToRefresh = findViewById(R.id.pull_to_refresh);
 
-        /*Create handle for the RetrofitInstance interface*/
         GetDataService service = RetrofitInstance.getRetrofitInstance().create(GetDataService.class);
 
-        /*Call the method with parameter in the interface to get the employee data*/
-        Call<Feeds> call = service.getItems("json",1);
-
-        /*Log the URL called*/
-        Log.wtf("URL Called", call.request().url() + "");
+        final Call<Feeds> call = service.getItems("json",1);
 
         call.enqueue(new Callback<Feeds>() {
             @Override
             public void onResponse(Call<Feeds> call, Response<Feeds> response) {
-                generateEmployeeList(response.body().getItems());
+                generateItemsList(response.body().getItems());
             }
 
             @Override
@@ -59,13 +57,23 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                recreate();
+
+                pullToRefresh.setRefreshing(false);
+            }
+        });
+
+
     }
 
-    /*Method to generate List of employees using RecyclerView with custom adapter*/
-    private void generateEmployeeList(List<Items> empDataList) {
+    private void generateItemsList(List<Items> DataList) {
 
 
-        adapter = new Adapter(empDataList);
+        adapter = new Adapter(DataList);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
 

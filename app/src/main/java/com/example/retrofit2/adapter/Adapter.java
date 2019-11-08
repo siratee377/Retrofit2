@@ -1,5 +1,7 @@
 package com.example.retrofit2.adapter;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,10 +34,10 @@ public class Adapter extends RecyclerView.Adapter <Adapter.MyViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
 
         Items model = mItems.get(position);
-        String link = model.getLink();
+        final String link = model.getLink();
         String image = model.getMedia().getM();
 
         Picasso.get().load(image).into(holder.imageView);
@@ -43,6 +45,10 @@ public class Adapter extends RecyclerView.Adapter <Adapter.MyViewHolder>{
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Uri uri = Uri.parse(link);
+                Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                holder.imageView.getContext().startActivity(intent);
 
             }
         });
